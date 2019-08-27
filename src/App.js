@@ -1,20 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.scss';
+import React, { Component } from 'react';
+import { BrowserRouter as Switch, Route } from 'react-router-dom';
+import routes from './routes';
 
-function App() {
-  return (
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dropdown button
-  </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
+class App extends Component {
+  render() {
+    const getRoutes = routes.map((route, index) => {
+      return <Route key={index} path={route.path} exact={route.exact} component={route.component} />
+    })
+    return (
+      <div>
+        <Switch>
+          {getRoutes}
+        </Switch>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default App;
