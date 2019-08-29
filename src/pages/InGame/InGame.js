@@ -1,79 +1,122 @@
 import React, { Component } from 'react';
 import './InGame.scss';
-import Board from './Board/Board';
 // import GameService from './../../utils/Service';
 import axios from 'axios';
-import { NavLink } from 'react-router-dom'
+
+import Board from './Board/Board';
+import Popup from '../../components/Popup/Popup';
+import Loading from '../../components/Loading/Loading';
+import CountUpTime from '../../components/CountUpTime/CountUpTime';
 
 class InGame extends Component {
     constructor(props) {
         super(props)
-        // get height, width mines from api through url https://tiki-minesweeper.herokuapp.com/getMines?size=9&mines=10
-        // https://tiki-minesweeper.herokuapp.com/getMines?size=16&mines=40
         this.state = {
             height: 0,
             width: 0,
             mines: 0,
-            minesPosition: [
-                // { x: 6, y: 0 },
-                // { x: 8, y: 1 },
-                // { x: 6, y: 4 },
-                // { x: 1, y: 6 },
-                // { x: 8, y: 2 },
-                // { x: 5, y: 0 },
-                // { x: 2, y: 2 }, 
-                // { x: 5, y: 1 },
-                // { x: 8, y: 5 },
-                // { x: 5, y: 4 }
-            ]
+            minesPosition: [],
+            loading: true,
+            countUp: false,
+            showModal: false,
+            currentTimer:{}
         }
     }
 
     componentDidMount() {
         const { match } = this.props;
         const level = match.params.level;
-        if(level === 'beginner') {
-           this.getInitData(9, 10)
+        if (level === 'beginner') {
+            this.getInitData(9, 10)
+
         } else {
-           this.getInitData(16, 40)
+            this.getInitData(16, 40)
         }
+        this.setState({
+            loading: false
+        })
     }
 
     getInitData(size, mines) {
         axios.get(`https://tiki-minesweeper.herokuapp.com/getMines?size=${size}&mines=${mines}`)
-        .then(rs => {
-            this.setState({
-                height: size,
-                width: size,
-                mines: mines,
-                minesPosition: rs.data.data
+            .then(rs => {
+                this.setState({
+                    height: size,
+                    width: size,
+                    mines: mines,
+                    minesPosition: rs.data.data
+                })
             })
-        })
     }
 
-    newGame() {
+    newGame = () => {
         this.setState({
-            minesPosition:0
+            height: 0,
+            width: 0,
+            mines: 0,
+            minesPosition: [],
+            loading: true,
+            countUp: false,
+            showModal: false
         })
         const { match } = this.props;
         const level = match.params.level;
-        if(level === 'beginner') {
-           this.getInitData(9, 10)
+        if (level === 'beginner') {
+            this.getInitData(9, 10)
         } else {
-           this.getInitData(16, 40)
+            this.getInitData(16, 40)
         }
+        this.setState({
+            loading: false
+        })
     }
 
+    countUp = () => {
+        this.setState({
+            countUp: true
+        })
+    }
+    stopCountUp = () => {
+        this.setState({
+            countUp: false,
+            showModal: true
+        })
+    }
+
+    currentTimer = (timer) => {
+        this.setState({
+            currentTimer: timer
+        })
+    }
+
+    renderBoard() {
+        const { height, width, mines, minesPosition, countUp } = this.state;
+        const { match } = this.props;
+        return (
+            <div className="in-game">
+                <div style={match.params.level === 'beginner' ? { width: '405px' } : { width: '720px' }}>
+                    <Board
+                        height={height}
+                        width={width}
+                        mines={mines}
+                        minesPosition={minesPosition}
+                        countUp={this.countUp}
+                        stopCountUp={this.stopCountUp}
+                    />
+                </div>
+                <div className="time">
+                    <CountUpTime countUp={countUp} currentTimer={this.currentTimer}/>
+                </div>
+            </div>
+        )
+    }
 
     render() {
-        const { height, width, mines, minesPosition } = this.state;
+        const { minesPosition, loading, showModal, currentTimer } = this.state;
         return (
-            <div className="ingame">
-                <button className="btn btn-primary" onClick={() => this.newGame()}>New game</button>
-                <NavLink className="btn btn-warning" to={'/'}>Home page</NavLink>
-                <br/>
-                <br/>
-                {minesPosition.length > 0 && <Board height={height} width={width} mines={mines} minesPosition={minesPosition} />}
+            <div>
+                {loading ? <Loading loading={loading} /> : minesPosition.length > 0 && this.renderBoard()}
+                {showModal ? (<Popup newGame={this.newGame} currentTimer={currentTimer}/>) : null}
             </div>
         );
     }

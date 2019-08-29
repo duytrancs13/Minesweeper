@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import Cell from '../Cell/Cell';
-import './Board.scss'
+import './Board.scss';
+
 
 class Board extends Component {
     constructor(props) {
         super(props)
         const { height, width, minesPosition } = this.props;
         this.state = {
-            boardData: this.initBoardData(height, width, minesPosition)
+            boardData: this.initBoardData(height, width, minesPosition),
+            clicked: false
         }
     }
 
@@ -30,6 +32,7 @@ class Board extends Component {
                     neighbour: 0,
                     isRevealed: false,
                     isEmpty: false,
+                    
                 }
             }
         }
@@ -104,13 +107,22 @@ class Board extends Component {
     }
 
     handleCellClick(x, y) {
-        const { boardData } = this.state;
+        const { boardData, clicked } = this.state;
         if (boardData[x][y].isRevealed) {
             return null;
         }
         if (boardData[x][y].isMine) {
             this.revealBoard();
-            alert("game over");
+            // alert("game over");
+            this.props.stopCountUp()
+        }
+        if(!clicked) {
+            if (!boardData[x][y].isMine) {
+                this.props.countUp();
+            }
+            this.setState({
+                clicked: true
+            })
         }
 
         let updatedData = this.state.boardData;
@@ -120,8 +132,8 @@ class Board extends Component {
         }
         if(this.getHidden(updatedData).length === this.props.mines) {
             this.revealBoard();
-            alert('You win')
-        } else {
+            // alert('You win')
+            this.props.stopTimer();
         }
 
         this.setState({
@@ -182,9 +194,8 @@ class Board extends Component {
     render() {
         const { boardData } = this.state;
 
-        
         return (
-            <div className="board">
+            <div>
                 {this.renderBoard(boardData)}
             </div>
         );

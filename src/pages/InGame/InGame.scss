@@ -1,5 +1,14 @@
-.ingame {
-    max-width: 450px;
-    margin: 0 auto;
-    padding: 20px;
+.in-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .board {
+        padding: 20px;
+        font-family: Baloo;
+        font-size: 14px;
+    }
+    .time {
+        font-family: Baloo;
+        font-size: 14px;
+    }
 }
